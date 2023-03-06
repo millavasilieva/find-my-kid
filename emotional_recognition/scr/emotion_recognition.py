@@ -34,6 +34,10 @@ def softmax(x):
     """Compute softmax values for each sets of scores in x."""
     return np.exp(x - np.max(x)) / np.exp(x - np.max(x)).sum()
 
+def std_norm(input_vector):
+    p = [round(i/sum(input_vector),3) for i in input_vector]
+    return p
+
 
 def find_emotion(fpath, model):
     frame_bgr=cv2.imread(fpath)
@@ -54,8 +58,8 @@ def find_emotion(fpath, model):
         
         scores = model(img_tensor.to(device))
         scores=scores[0].data.cpu().numpy()
-        scores = softmax(scores)
-        if max(scores) < 4.0:
+        scores = std_norm(softmax(scores))
+        if max(scores) < 0.45:
             emotions_name = idx_to_class[4]
         else:
             emotions_name = idx_to_class[np.argmax(scores)]
