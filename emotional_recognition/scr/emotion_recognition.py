@@ -1,34 +1,18 @@
 import torch
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 from PIL import Image
-from torchvision import transforms
+
+from config import model, test_transforms, idx_to_class, imagespath
+
 use_cuda = torch.cuda.is_available()
-print(use_cuda)
 device = 'cuda' if use_cuda else 'cpu'
 
 from facial_analysis import FacialImageProcessing
 imgProcessing=FacialImageProcessing(False)
 
-# idx_to_class={0: 'Anger', 1: 'Disgust', 2: 'Fear', 3: 'Happiness', 4: 'Neutral', 5: 'Sadness', 6: 'Surprise'}
-idx_to_class={0: 'neg', 1: 'neg', 2: 'neg', 3: 'pos', 4: 'pos', 5: 'neg', 6: 'pos'}
 
-def loadmodel(path):
-    model = torch.load(path,map_location=torch.device('cpu'))
-    model=model.to(device)
-    model.eval()
-    return model
-
-test_transforms = transforms.Compose(
-    [
-        transforms.Resize((IMG_SIZE,IMG_SIZE)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-    ]
-    )
 
 def softmax(x):
     """Compute softmax values for each sets of scores in x."""
@@ -71,21 +55,11 @@ def find_emotion(fpath, model):
         return fpath
     
 def emo_search(imagespath):
-    caught = []
-    for fpath in os.listdir(imagespath)[11:13]:
+    imageslist = []
+    for fpath in os.listdir(imagespath):
         f1 = imagespath+ fpath 
         a = find_emotion(f1,model)
         if (a != None):
             # print(a)
-            caught.append(a)
-    return caught
-
-def main():
-
-    IMG_SIZE=224
-    PATH='../models/affectnet_emotions/enet_b0_7.pt'
-    model = loadmodel(PATH)
-
-    imagespath = '../emotional_recognition/test/'
-    imageslist = emo_search(imagespath)
+            imageslist.append(a)
     return imageslist
